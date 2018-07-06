@@ -5,7 +5,17 @@ export default class Flex extends React.Component {
 	render() {
 		return (
 			<View style={styles.container}>
-				<View style={{ width: 50, height: 50, backgroundColor: 'red' }} />
+				<View
+					style={{
+						width: 50,
+						height: 50,
+						backgroundColor: 'red',
+						justifyContent: 'center',
+						alignItems: 'center'
+					}}
+				>
+					<Text style={{ color: '#fff', fontSize: 20 }}>Hello</Text>
+				</View>
 				<View style={{ width: 50, height: 50, backgroundColor: 'green' }} />
 				<View style={{ width: 50, height: 50, backgroundColor: 'blue' }} />
 			</View>
@@ -16,7 +26,7 @@ export default class Flex extends React.Component {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: 'orange',
+		backgroundColor: '#fff',
 		alignItems: 'center',
 		justifyContent: 'space-around'
 	}
