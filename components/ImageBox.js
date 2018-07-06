@@ -13,6 +13,25 @@ export default class ImageBox extends React.Component {
 						resizeMode: 'center'
 					}}
 				/> */}
+				<View
+					style={{
+						marginTop: 25,
+						width: '100%',
+						flexDirection: 'row',
+						justifyContent: 'space-around',
+						alignItems: 'center'
+					}}
+				>
+					<Image
+						source={{ uri: 'http://www.hndt.com/podcast/1111/res/xtmZ0Bee.png?1508751589195' }}
+						style={{
+							width: 60,
+							height: 60,
+							resizeMode: 'center'
+						}}
+					/>
+					<Text>这是文字</Text>
+				</View>
 				<Image
 					source={{ uri: 'https://img.alicdn.com/tps/TB1OvT9NVXXXXXdaFXXXXXXXXXX-520-280.jpg' }}
 					style={styles.imgStyle}
