@@ -1,9 +1,66 @@
 import React from 'react';
-import { StyleSheet, Text, View, Image, Dimensions, FlatList } from 'react-native';
+import { StyleSheet, Text, View, Image, Dimensions, FlatList, PixelRatio } from 'react-native';
+import SwipeOut from 'react-native-swipeout';
 
-export default class ImageBox extends React.Component {
+class FlatListItem extends React.Component {
 	render() {
-		return <FlatList data={[ { key: 'a' }, { key: 'b' } ]} renderItem={({ item }) => <Text>{item.key}</Text>} />;
+		const SwipeSetting = {
+			autoClose: true,
+			onClose: (secId, rowId, direction) => {},
+			onOpen: (secId, rowId, direction) => {},
+			right: [
+				{
+					onPress: () => {},
+					text: 'Delete',
+					type: 'delete'
+				}
+			]
+		};
+		return (
+			<SwipeOut {...SwipeSetting}>
+				<View
+					style={{
+						flex: 1,
+						flexDirection: 'row',
+						backgroundColor: 'mediumseagreen',
+						borderBottomColor: 'white',
+						borderBottomWidth: 1 / PixelRatio.get()
+					}}
+				>
+					<Image source={{ uri: this.props.item.icon }} style={{ width: 100, height: 100, margin: 5 }} />
+					<View style={{ flex: 1 }}>
+						<Text style={styles.flatListItem}>{this.props.item.name}</Text>
+						<Text style={styles.flatListItem}>{this.props.item.mobile}</Text>
+					</View>
+				</View>
+			</SwipeOut>
+		);
+	}
+}
+export default class ImageBox extends React.Component {
+	constructor() {
+		super();
+		this.state = {
+			flatListData: []
+		};
+	}
+	componentDidMount() {
+		fetch('http://rap2api.taobao.org/app/mock/1942/rndemo').then((res) => res.json()).then((resJson) => {
+			this.setState({
+				flatListData: resJson.list
+			});
+		});
+	}
+	render() {
+		return (
+			<View style={{ flex: 1, marginTop: 20 }}>
+				<FlatList
+					data={this.state.flatListData}
+					renderItem={({ item, index }) => <FlatListItem item={item} index={index} />}
+					keyExtractor={(item, index) => item.openId}
+				/>
+			</View>
+		);
 	}
 }
 
@@ -14,15 +71,9 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'space-around'
 	},
-	imgStyle: {
-		width: Dimensions.get('window').width,
-		height: 200,
-		justifyContent: 'center'
-	},
-	textStyle: {
+	flatListItem: {
 		padding: 10,
-		textAlign: 'center',
-		color: '#fff',
-		backgroundColor: '#0081dc'
+		color: 'white',
+		fontSize: 16
 	}
 });
