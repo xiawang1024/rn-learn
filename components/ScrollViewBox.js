@@ -7,6 +7,7 @@ export default class ImageBox extends React.Component {
 			<ScrollView
 				contentContainerStyle={{ flex: 1, justifyContent: 'space-around' }}
 				keyboardDismissMode={'on-drag'}
+				pagingEnabled={true}
 			>
 				{/* <Image
 					source={require('./img.jpg')}
