@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, Image, Dimensions, FlatList, PixelRatio } from 'react-native';
+import { StyleSheet, Text, View, Image, Dimensions, FlatList, Alert, PixelRatio } from 'react-native';
 import SwipeOut from 'react-native-swipeout';
 
 class FlatListItem extends React.Component {
@@ -9,6 +9,9 @@ class FlatListItem extends React.Component {
 			activeRowKey: null
 		};
 	}
+	deleteItem = (msg) => {
+		this.props.callback(msg);
+	};
 	render() {
 		const SwipeSetting = {
 			autoClose: true,
@@ -42,6 +45,8 @@ class FlatListItem extends React.Component {
 									text: 'Yes',
 									onPress: () => {
 										console.log('Cancel');
+										this.deleteItem(this.state.activeRowKey);
+										console.log(this.state.activeRowKey);
 									},
 									style: 'cancel'
 								}
@@ -55,8 +60,9 @@ class FlatListItem extends React.Component {
 					type: 'delete'
 				}
 			],
-			rowId: this.props.index,
-			sectionId: 1
+			scroll: (event) => {
+				console.log(event); //水平滑动返回false，竖直滑动返回true，可以设置 ScrollView 和 ListView 的scrollEnabled
+			}
 		};
 		return (
 			<SwipeOut {...SwipeSetting}>
@@ -100,12 +106,24 @@ export default class ImageBox extends React.Component {
 			});
 		});
 	}
+	deleteItem = (childrenMsg) => {
+		console.log('childrenMsg', childrenMsg);
+		this.setState((previousState) => {
+			return {
+				flatListData: previousState.flatListData.filter((item, index) => {
+					return item.openId !== childrenMsg;
+				})
+			};
+		});
+	};
 	render() {
 		return (
 			<View style={{ flex: 1, marginTop: 20 }}>
 				<FlatList
 					data={this.state.flatListData}
-					renderItem={({ item, index }) => <FlatListItem item={item} index={index} />}
+					renderItem={({ item, index }) => (
+						<FlatListItem item={item} index={index} ref="children" callback={this.deleteItem} />
+					)}
 					keyExtractor={(item, index) => item.openId}
 				/>
 			</View>
