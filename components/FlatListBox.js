@@ -3,35 +3,84 @@ import { StyleSheet, Text, View, Image, Dimensions, FlatList, PixelRatio } from 
 import SwipeOut from 'react-native-swipeout';
 
 class FlatListItem extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			activeRowKey: null
+		};
+	}
 	render() {
 		const SwipeSetting = {
 			autoClose: true,
-			onClose: (secId, rowId, direction) => {},
-			onOpen: (secId, rowId, direction) => {},
+			onClose: (secId, rowId, direction) => {
+				if (this.state.activeRowKey != null) {
+					this.setState({
+						activeRowKey: this.props.item.openId
+					});
+				}
+			},
+			onOpen: (secId, rowId, direction) => {
+				this.setState({
+					activeRowKey: this.props.item.openId
+				});
+			},
 			right: [
 				{
-					onPress: () => {},
+					onPress: () => {
+						Alert.alert(
+							'Alert',
+							'Are you sure you want to delete?',
+							[
+								{
+									text: 'No',
+									onPress: () => {
+										console.log('Cancel');
+									},
+									style: 'cancel'
+								},
+								{
+									text: 'Yes',
+									onPress: () => {
+										console.log('Cancel');
+									},
+									style: 'cancel'
+								}
+							],
+							{
+								cancelable: true
+							}
+						);
+					},
 					text: 'Delete',
 					type: 'delete'
 				}
-			]
+			],
+			rowId: this.props.index,
+			sectionId: 1
 		};
 		return (
 			<SwipeOut {...SwipeSetting}>
-				<View
-					style={{
-						flex: 1,
-						flexDirection: 'row',
-						backgroundColor: 'mediumseagreen',
-						borderBottomColor: 'white',
-						borderBottomWidth: 1 / PixelRatio.get()
-					}}
-				>
-					<Image source={{ uri: this.props.item.icon }} style={{ width: 100, height: 100, margin: 5 }} />
-					<View style={{ flex: 1 }}>
-						<Text style={styles.flatListItem}>{this.props.item.name}</Text>
-						<Text style={styles.flatListItem}>{this.props.item.mobile}</Text>
+				<View style={{ flex: 1, flexDirection: 'column' }}>
+					<View
+						style={{
+							flex: 1,
+							flexDirection: 'row',
+							backgroundColor: 'mediumseagreen'
+						}}
+					>
+						<Image source={{ uri: this.props.item.icon }} style={{ width: 100, height: 100, margin: 5 }} />
+
+						<View style={{ flex: 1 }}>
+							<Text style={styles.flatListItem}>{this.props.item.name}</Text>
+							<Text style={styles.flatListItem}>{this.props.item.mobile}</Text>
+						</View>
 					</View>
+					<View
+						style={{
+							height: 1,
+							backgroundColor: 'white'
+						}}
+					/>
 				</View>
 			</SwipeOut>
 		);
