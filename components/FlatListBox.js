@@ -26,6 +26,7 @@ class FlatListItem extends React.Component {
 				this.setState({
 					activeRowKey: this.props.item.openId
 				});
+				console.log(this.props.fatherRefresh);
 			},
 			right: [
 				{
@@ -92,7 +93,7 @@ class FlatListItem extends React.Component {
 		);
 	}
 }
-export default class ImageBox extends React.Component {
+export default class FlatListBox extends React.Component {
 	constructor() {
 		super();
 		this.state = {
@@ -122,9 +123,16 @@ export default class ImageBox extends React.Component {
 				<FlatList
 					data={this.state.flatListData}
 					renderItem={({ item, index }) => (
-						<FlatListItem item={item} index={index} ref="children" callback={this.deleteItem} />
+						<FlatListItem
+							item={item}
+							index={index}
+							ref="children"
+							callback={this.deleteItem}
+							fatherRefresh={this}
+						/>
 					)}
 					keyExtractor={(item, index) => item.openId}
+					extraData={this.state}
 				/>
 			</View>
 		);
