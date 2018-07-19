@@ -101,9 +101,9 @@ export default class FlatListBox extends React.Component {
 		};
 	}
 	componentDidMount() {
-		fetch('http://rap2api.taobao.org/app/mock/1942/rndemo').then((res) => res.json()).then((resJson) => {
+		fetch('http://192.168.9.41:3000/api/rnGet').then((res) => res.json()).then((resJson) => {
 			this.setState({
-				flatListData: resJson.list
+				flatListData: resJson
 			});
 		});
 	}
