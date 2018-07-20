@@ -2,6 +2,8 @@ import React from 'react';
 import { StyleSheet, Text, View, Image, Dimensions, FlatList, Alert, PixelRatio } from 'react-native';
 import SwipeOut from 'react-native-swipeout';
 
+import ModalBox from './ModalBox';
+
 class FlatListItem extends React.Component {
 	constructor(props) {
 		super(props);
@@ -9,8 +11,11 @@ class FlatListItem extends React.Component {
 			activeRowKey: null
 		};
 	}
-	deleteItem = (msg) => {
-		this.props.callback(msg);
+	deleteItem = (index, openId) => {
+		this.props.delCb(index, openId);
+	};
+	editorItem = (index, openId) => {
+		this.props.editorCb(index, openId);
 	};
 	render() {
 		const SwipeSetting = {
@@ -26,9 +31,15 @@ class FlatListItem extends React.Component {
 				this.setState({
 					activeRowKey: this.props.item.openId
 				});
-				console.log(this.props.fatherRefresh);
 			},
 			right: [
+				{
+					onPress: () => {
+						this.editorItem(this.props.index, this.state.activeRowKey);
+					},
+					text: 'Editor',
+					type: 'primary'
+				},
 				{
 					onPress: () => {
 						Alert.alert(
@@ -46,8 +57,8 @@ class FlatListItem extends React.Component {
 									text: 'Yes',
 									onPress: () => {
 										console.log('Cancel');
-										this.deleteItem(this.state.activeRowKey);
-										console.log(this.state.activeRowKey);
+										// this.deleteItem(this.state.activeRowKey);
+										this.deleteItem(this.props.index, this.state.activeRowKey);
 									},
 									style: 'cancel'
 								}
@@ -97,25 +108,57 @@ export default class FlatListBox extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			flatListData: []
+			flatListData: [],
+			editorItemData: {}
 		};
 	}
 	componentDidMount() {
-		fetch('http://192.168.9.41:3000/api/rnGet').then((res) => res.json()).then((resJson) => {
+		return fetch('http://192.168.9.41:3000/api/rnGet').then((res) => res.json()).then((resJson) => {
 			this.setState({
 				flatListData: resJson
 			});
 		});
 	}
-	deleteItem = (childrenMsg) => {
-		console.log('childrenMsg', childrenMsg);
-		this.setState((previousState) => {
-			return {
-				flatListData: previousState.flatListData.filter((item, index) => {
-					return item.openId !== childrenMsg;
-				})
-			};
+	deleteItem = async (delIndex, delOpenId) => {
+		console.log('childrenMsg', delIndex, delOpenId);
+
+		let delFlag = await this.fetchDeleteItem(delOpenId);
+		if (delFlag === 0) {
+			this.setState((previousState) => {
+				let data = previousState.flatListData;
+				data.splice(delIndex, 1);
+				return {
+					flatListData: data
+				};
+			});
+			alert('删除成功！');
+		} else {
+			alert('删除失败！');
+		}
+	};
+	editorItem = async (editorIndex, editorOpenId) => {
+		let editorItemData = this.state.flatListData.filter((item) => {
+			return item.openId === editorOpenId;
 		});
+		this.setState({ editorItemData: editorItemData[0] });
+		console.log(editorItemData);
+		this.refs.modalBox.showModal();
+	};
+	fetchDeleteItem = async (delOpenId) => {
+		try {
+			let response = await fetch('http://192.168.9.41:3000/api/rnDelete', {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ openId: delOpenId })
+			});
+
+			let responseJson = await response.json();
+			return responseJson.status;
+		} catch (err) {
+			console.log(err);
+		}
 	};
 	render() {
 		return (
@@ -127,13 +170,15 @@ export default class FlatListBox extends React.Component {
 							item={item}
 							index={index}
 							ref="children"
-							callback={this.deleteItem}
+							delCb={this.deleteItem}
+							editorCb={this.editorItem}
 							fatherRefresh={this}
 						/>
 					)}
 					keyExtractor={(item, index) => item.openId}
 					extraData={this.state}
 				/>
+				<ModalBox ref={'modalBox'} parentFlatList={this} editorItem={this.state.editorItemData} />
 			</View>
 		);
 	}

@@ -7,6 +7,7 @@ import { StyleSheet, Text, View } from 'react-native';
 // import ScrollViewBox from './components/ScrollViewBox';
 // import HorizontalScroll from './components/HorizontalScroll';
 import FlatListBox from './components/FlatListBox';
+// import ModalBox from './components/ModalBox';
 export default class App extends React.Component {
 	render() {
 		return (
