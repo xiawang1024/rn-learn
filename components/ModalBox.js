@@ -9,10 +9,15 @@ export default class ModalBox extends Component {
 		super(props);
 		this.state = {
 			name: '',
-			mobile: ''
+			mobile: '',
+			flatItem: null
 		};
 	}
-	showModal = () => {
+	showModal = (_this, changeItem) => {
+		this.setState({
+			flatItem: _this
+		});
+		this.setState({ name: '', mobile: '' });
 		this.refs.myModal.open();
 	};
 	render() {
@@ -60,7 +65,27 @@ export default class ModalBox extends Component {
 					>
 						取消
 					</Button>
-					<Button style={{ fontSize: 16, color: 'white' }} containerStyle={styles.button}>
+					<Button
+						style={{ fontSize: 16, color: 'white' }}
+						containerStyle={styles.button}
+						onPress={() => {
+							let changeItem = {
+								_id: this.props.editorItem._id,
+								name: this.state.name || this.props.editorItem.name,
+								mobile: this.state.mobile || this.props.editorItem.mobile
+							};
+							console.log(this.state.name);
+							this.props.parentFlatList.fetchEditItem(changeItem).then((result) => {
+								if (result === 0) {
+									this.state.flatItem.refreshFlatListItem(changeItem);
+									this.refs.myModal.close();
+									alert('修改成功！');
+								} else {
+									alert('修改失败！');
+								}
+							});
+						}}
+					>
 						确定
 					</Button>
 				</View>

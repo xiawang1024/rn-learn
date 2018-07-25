@@ -8,14 +8,18 @@ class FlatListItem extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			activeRowKey: null
+			activeRowKey: null,
+			changeItem: {}
 		};
 	}
 	deleteItem = (index, openId) => {
 		this.props.delCb(index, openId);
 	};
 	editorItem = (index, openId) => {
-		this.props.editorCb(index, openId);
+		this.props.editorCb(index, openId, this, this.state.changeItem);
+	};
+	refreshFlatListItem = (changeItem) => {
+		this.setState({ changeItem });
 	};
 	render() {
 		const SwipeSetting = {
@@ -35,6 +39,7 @@ class FlatListItem extends React.Component {
 			right: [
 				{
 					onPress: () => {
+						console.log(this.state.changeItem);
 						this.editorItem(this.props.index, this.state.activeRowKey);
 					},
 					text: 'Editor',
@@ -89,8 +94,12 @@ class FlatListItem extends React.Component {
 						<Image source={{ uri: this.props.item.icon }} style={{ width: 100, height: 100, margin: 5 }} />
 
 						<View style={{ flex: 1 }}>
-							<Text style={styles.flatListItem}>{this.props.item.name}</Text>
-							<Text style={styles.flatListItem}>{this.props.item.mobile}</Text>
+							<Text style={styles.flatListItem}>
+								{this.state.changeItem.name || this.props.item.name}
+							</Text>
+							<Text style={styles.flatListItem}>
+								{this.state.changeItem.mobile || this.props.item.mobile}
+							</Text>
 						</View>
 					</View>
 					<View
@@ -113,7 +122,7 @@ export default class FlatListBox extends React.Component {
 		};
 	}
 	componentDidMount() {
-		return fetch('http://192.168.9.41:3000/api/rnGet').then((res) => res.json()).then((resJson) => {
+		return fetch('http://192.168.9.41:3000/api/rnGet/all').then((res) => res.json()).then((resJson) => {
 			this.setState({
 				flatListData: resJson
 			});
@@ -136,17 +145,37 @@ export default class FlatListBox extends React.Component {
 			alert('删除失败！');
 		}
 	};
-	editorItem = async (editorIndex, editorOpenId) => {
+	editorItem = async (editorIndex, editorOpenId, _this, changeItem) => {
 		let editorItemData = this.state.flatListData.filter((item) => {
 			return item.openId === editorOpenId;
-		});
-		this.setState({ editorItemData: editorItemData[0] });
+		})[0];
+
+		if (Object.keys(changeItem).length !== 0) {
+			editorItemData.name = changeItem.name;
+			editorItemData.mobile = changeItem.mobile;
+		}
 		console.log(editorItemData);
-		this.refs.modalBox.showModal();
+		this.setState({ editorItemData: editorItemData });
+		this.refs.modalBox.showModal(_this, changeItem);
+	};
+	fetchEditItem = async ({ _id, name, mobile }) => {
+		try {
+			let response = await fetch('http://192.168.9.41:3000/api/rnEdit', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ _id, name, mobile })
+			});
+			let resJson = await response.json();
+			return resJson.status;
+		} catch (err) {
+			console.log(err);
+		}
 	};
 	fetchDeleteItem = async (delOpenId) => {
 		try {
-			let response = await fetch('http://192.168.9.41:3000/api/rnDelete', {
+			let response = await fetch('http://192.168.9.41:3000/api/rnDelete/all', {
 				method: 'DELETE',
 				headers: {
 					'Content-Type': 'application/json'
@@ -175,7 +204,7 @@ export default class FlatListBox extends React.Component {
 							fatherRefresh={this}
 						/>
 					)}
-					keyExtractor={(item, index) => item.openId}
+					keyExtractor={(item, index) => item._id}
 					extraData={this.state}
 				/>
 				<ModalBox ref={'modalBox'} parentFlatList={this} editorItem={this.state.editorItemData} />
